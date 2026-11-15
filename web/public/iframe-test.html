@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>اختبار التضمين — جُمان</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Tahoma, Arial, sans-serif; background: #e8e0d0; padding: 2rem; }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 1.25rem; margin-bottom: 0.5rem; color: #0e1f3a; }
+    p { font-size: 0.875rem; color: #22324b; margin-bottom: 1rem; }
+    .frame-wrapper {
+      border: 2px solid #be9748;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fbf9f4;
+    }
+    iframe {
+      display: block;
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .diagnostics {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #fbf9f4;
+      border: 1px solid #e6dfcf;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      color: #22324b;
+      direction: ltr;
+      text-align: left;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>اختبار التضمين — جُمان</h1>
+    <p>واجهة المحادثة مضمّنة أدناه في إطار:</p>
+    <div class="frame-wrapper">
+      <iframe
+        id="chat-frame"
+        src="http://localhost:3000"
+        title="محادثة جُمان"
+        allow="clipboard-write"
+      ></iframe>
+    </div>
+    <div class="diagnostics" id="diag">Measuring…</div>
+  </div>
+  <script>
+    const iframe = document.getElementById('chat-frame');
+    const diag = document.getElementById('diag');
+
+    iframe.addEventListener('load', () => {
+      try {
+        const win = iframe.contentWindow;
+        const doc = iframe.contentDocument || win.document;
+        const html = doc.documentElement;
+        const body = doc.body;
+
+        const height = iframe.getBoundingClientRect().height;
+        const dir = html.getAttribute('dir') || getComputedStyle(html).direction;
+        const lang = html.getAttribute('lang') || '(not set)';
+        const font = getComputedStyle(body || html).fontFamily;
+        const bg = getComputedStyle(body || html).backgroundColor;
+
+        // Check for Juman theme tokens
+        const rootStyle = getComputedStyle(html);
+        const hasTheme = rootStyle.getPropertyValue('--juman-navy').trim() !== '';
+
+        diag.textContent = [
+          `height: ${height}px`,
+          `dir: ${dir}`,
+          `lang: ${lang}`,
+          `font: ${font}`,
+          `background: ${bg}`,
+          `juman-theme: ${hasTheme ? 'loaded' : 'NOT loaded'}`,
+        ].join('\n');
+      } catch (e) {
+        diag.textContent = `Cross-origin: cannot read frame contents (${e.message})`;
+      }
+    });
+  </script>
+</body>
+</html>

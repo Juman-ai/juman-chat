@@ -1,0 +1,47 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/*
+ * Juman brand layer for the chat spike. Tokens only.
+ * Source of truth: juman-site/assets/juman.css (:root block). Values copied, not invented.
+ * Namespaced as --juman-* because juman.css's own "--muted" collides with the
+ * shadcn/assistant-ui "--muted" variable (which is a background, not a text color).
+ * Swap this one file to change the brand; components are untouched.
+ */
+html:root {
+  /* --- Juman tokens (from juman.css) --- */
+  --juman-navy: #0e1f3a;
+  --juman-gold: #be9748;
+  --juman-cream: #f3ecdd;
+  --juman-teal: #2a7f8f;
+  --juman-ink: #22324b;
+  --juman-muted: #8a93a3;
+  --juman-paper: #fbf9f4;
+  --juman-line: #e6dfcf;
+  --juman-surface: #fff; /* .card background in juman.css */
+
+  /* Font stack order as in juman.css: Zain, IBM Plex Sans Arabic, Tahoma, Arial */
+  --font-juman:
+    var(--font-zain), var(--font-plex-arabic), Tahoma, Arial, sans-serif;
+
+  /* --- Mapping onto assistant-ui / shadcn theme variables --- */
+  --radius: 0.75rem; /* .btn radius 12px */
+  --background: var(--juman-paper);
+  --foreground: var(--juman-ink);
+  --card: var(--juman-surface);
+  --card-foreground: var(--juman-ink);
+  --popover: var(--juman-surface);
+  --popover-foreground: var(--juman-ink);
+  --primary: var(--juman-navy);
+  --primary-foreground: var(--juman-paper);
+  --secondary: var(--juman-cream);
+  --secondary-foreground: var(--juman-navy);
+  --muted: var(--juman-cream);
+  /* --juman-muted on paper is ~3.1:1 (fails WCAG AA for text), so secondary
+     text is derived from ink instead. No new hex introduced. */
+  --muted-foreground: color-mix(in srgb, var(--juman-ink) 80%, var(--juman-paper));
+  --accent: var(--juman-cream);
+  --accent-foreground: var(--juman-navy);
+  --border: var(--juman-line);
+  --input: var(--juman-line);
+  /* Gold is accent only (focus ring). Gold text on paper/white is ~2.7:1. */
+  --ring: var(--juman-gold);
+}
