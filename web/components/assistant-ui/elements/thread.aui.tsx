@@ -8,6 +8,7 @@ import { ToolFallback } from "@/components/assistant-ui/elements/tool-fallback.a
 import { TooltipIconButton } from "@/components/assistant-ui/elements/tooltip-icon-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTenantConfig } from "@/app/assistant";
 import {
   ActionBarMorePrimitive,
   ActionBarPrimitive,
@@ -158,10 +159,11 @@ const ThreadScrollToBottom: FC = () => {
 };
 
 const ThreadWelcome: FC = () => {
+  const config = useTenantConfig();
   return (
     <div className="aui-thread-welcome-root mb-6 flex flex-col px-2">
       <p className="aui-thread-welcome-message-inner fade-in slide-in-from-bottom-1 animate-in fill-mode-both text-2xl font-medium tracking-tight duration-200">
-        {t.welcomeMessage}
+        {config?.welcome_text || t.welcomeMessage}
       </p>
     </div>
   );
@@ -234,7 +236,11 @@ const ComposerAction: FC = () => {
 
   return (
     <div className="aui-composer-action-wrapper relative flex items-center justify-between">
-      <ComposerAddAttachment />
+      {process.env.NEXT_PUBLIC_ENABLE_ATTACHMENTS === "true" ? (
+        <ComposerAddAttachment />
+      ) : (
+        <div />
+      )}
       <div className="flex items-center gap-2">
         <AuiIf condition={(s) => s.thread.capabilities.dictation}>
           <AuiIf condition={(s) => s.composer.dictation == null}>

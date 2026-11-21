@@ -191,6 +191,11 @@ npm run build
 npm start
 ```
 
+| Variable | Default | Purpose |
+|---|---|---|
+| `NEXT_PUBLIC_JUMAN_API_URL` | `http://localhost:8000` | Backend API URL |
+| `NEXT_PUBLIC_ENABLE_ATTACHMENTS` | _(unset = hidden)_ | Set to `true` to show the file-attach button |
+
 The frontend runs on `http://localhost:3000`. To test embedding, open `http://localhost:3000/iframe-test.html`.
 
 ## Project structure
