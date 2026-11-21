@@ -14,6 +14,8 @@
 
 واجهة محادثة عربية لمساعد يجيب الزائر من محتوى الجهة المعتمد، ويذكر مصدر كل إجابة، ولا ينفّذ أي إجراء قبل موافقة الموظف.
 
+هذا المستودع هو واجهة المحادثة فقط. نواة جُمان التي تجيب من محتوى الجهة خدمة تجارية مغلقة، وتتصل بها الواجهة عبر واجهة برمجية موثقة.
+
 > **الحالة: نسخة معاينة.** الخادم في هذا المستودع تجريبي، يعيد إجابات ثابتة لعرض الواجهة. ربط الواجهة بمحتوى الجهة وبنموذج اللغة يكون في نواة جُمان.
 
 ## لماذا جُمان
@@ -40,6 +42,23 @@
 - **مسودة** ← بطاقة موافقة على إنشاء مسودة.
 - **أي سؤال آخر** ← حالة «غير مشمول بالمحتوى».
 
+### حقل التواصل في رد «غير مشمول»
+
+حقل `contact` اختياري، يظهر فقط حين تُهيّئ الجهة قناة تواصل.
+
+- `label`: نص الرابط (قد يكون فارغًا؛ عندها تعرض الواجهة العنوان نفسه).
+- `url`: يجب أن يستخدم `https:` أو `tel:` أو `mailto:`. أي مخطط آخر يُهمله الخادم وتتجاهله الواجهة.
+
+على الواجهات والتطبيقات التي تستهلك الرد التعامل مع الحقل كاختياري: الخوادم القديمة لا ترسله، والواجهات القديمة تتجاهله. مثال:
+
+```json
+{
+  "type": "not-covered",
+  "message": "عذرًا، لا أستطيع الإجابة على هذا السؤال من المعلومات المتاحة.",
+  "contact": { "label": "تواصل معنا", "url": "https://example.com/contact" }
+}
+```
+
 ## ما يميّز الواجهة
 
 - **لا اتصال خارجي:** المتصفح لا يتصل إلا بخوادم التشغيل نفسها. فُحصت الشبكة على نسخة الإنتاج، ولم يظهر أي طلب لجهة خارجية.
@@ -59,11 +78,16 @@
 - الخطوط تُنزَّل من Google وقت البناء، ويلزم استضافتها محليًا للبناء دون إنترنت.
 - ارتفاع الإطار (iframe) ثابت.
 
-## الترخيص والدعم
+## الترخيص
 
 الكود بترخيص AGPL-3.0-or-later، ومكونات assistant-ui وshadcn/ui المنسوخة بترخيص MIT (انظر [NOTICE](NOTICE)). اسم «جُمان» وشعارها علامة تجارية مسجلة وغير مشمولة بالترخيص (انظر [TRADEMARKS.md](TRADEMARKS.md)).
 
-للدعم: support@juman.ai · [juman.ai](https://juman.ai) · [Issues](https://github.com/Juman-ai/juman-chat/issues). وللبلاغات الأمنية: [SECURITY.md](SECURITY.md).
+## الدعم والمساهمة وخارطة الطريق
+
+- **الدعم:** مجاني من المجتمع عبر Issues، ومدفوع للجهات بعقد ومستوى خدمة. التفاصيل في [SUPPORT.md](SUPPORT.md) · support@juman.ai.
+- **المساهمة:** مفتوحة للجميع، بالكود أو الترجمة أو الاختبار أو التوثيق. الطريقة في [CONTRIBUTING.md](CONTRIBUTING.md)، والانضمام إلى [شبكة جُمان](https://juman.ai/join).
+- **خارطة الطريق:** [ROADMAP.md](ROADMAP.md). **الحوكمة:** [GOVERNANCE.md](GOVERNANCE.md). **سجل التغييرات:** [CHANGELOG.md](CHANGELOG.md).
+- **البلاغات الأمنية:** [SECURITY.md](SECURITY.md).
 
 </div>
 
@@ -78,6 +102,8 @@
 # Juman — Smart Assistant UI
 
 An Arabic-first chat interface for an assistant that answers visitors from the entity's approved content, cites the source of every answer, and runs no action until a staff member approves it.
+
+This repository is the chat interface only. The Juman core that answers from an entity's content is a closed commercial service; the interface connects to it through a documented API.
 
 > **Status: Preview.** The backend in this repository is a demo that returns canned answers to show the interface. Connecting to an entity's content and to a language model happens in the Juman core.
 
@@ -104,6 +130,23 @@ After [running](#running) both parts, type in the chat:
 - **ترخيص** (licence) → an answer with a source link.
 - **مسودة** (draft) → an approval card for creating a draft.
 - **anything else** → the "not covered" state.
+
+### The contact field in the not-covered response
+
+The `contact` field is optional. It is present only when the entity has a contact channel configured.
+
+- `label`: string, the link text (may be empty; the UI then shows the URL).
+- `url`: string, must use `https:`, `tel:` or `mailto:`. Any other scheme is dropped by the server and ignored by the UI.
+
+Clients must treat the field as optional: older servers do not send it, and older UIs ignore it. Example:
+
+```json
+{
+  "type": "not-covered",
+  "message": "عذرًا، لا أستطيع الإجابة على هذا السؤال من المعلومات المتاحة.",
+  "contact": { "label": "تواصل معنا", "url": "https://example.com/contact" }
+}
+```
 
 ## Highlights
 
@@ -168,8 +211,13 @@ docs/images/             Infographics and screenshots
 - Fonts are fetched from Google at build time; self-host them for offline builds.
 - The iframe height is fixed.
 
-## License and support
+## License
 
 AGPL-3.0-or-later. The copied assistant-ui and shadcn/ui components are MIT (see [NOTICE](NOTICE)). The name "جُمان / Juman" and its logo are registered trademarks and are not licensed (see [TRADEMARKS.md](TRADEMARKS.md)).
 
-Contributions need a DCO sign-off ([CONTRIBUTING.md](CONTRIBUTING.md)). Support: support@juman.ai · [juman.ai](https://juman.ai) · [Issues](https://github.com/Juman-ai/juman-chat/issues). Security reports: [SECURITY.md](SECURITY.md).
+## Support, contributing and roadmap
+
+- **Support:** free community support through Issues, and paid support for entities under a service-level contract. See [SUPPORT.md](SUPPORT.md) · support@juman.ai.
+- **Contributing:** open to everyone, through code, translation, testing or documentation. See [CONTRIBUTING.md](CONTRIBUTING.md), and join the [Juman Network](https://juman.ai/join).
+- **Roadmap:** [ROADMAP.md](ROADMAP.md). **Governance:** [GOVERNANCE.md](GOVERNANCE.md). **Changelog:** [CHANGELOG.md](CHANGELOG.md).
+- **Security reports:** [SECURITY.md](SECURITY.md).
