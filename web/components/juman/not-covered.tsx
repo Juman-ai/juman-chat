@@ -14,37 +14,39 @@ function isSafeContactUrl(url: string): boolean {
   }
 }
 
+type NotCoveredData = {
+  message: string;
+  contact?: { label: string; url: string };
+};
+
 export const NotCoveredDataUI = makeAssistantDataUI({
   name: "not-covered",
   render: ({ data }) => {
-    const { message, contact } = data as {
-      message: string;
-      contact?: { label: string; url: string };
-    };
+    const { message, contact } = data as NotCoveredData;
     const safeContact =
       contact?.url && isSafeContactUrl(contact.url) ? contact : null;
     return (
       <div
         role="status"
-        className="flex items-center gap-3 rounded-xl border-2 border-[var(--juman-gold)] bg-[var(--juman-cream)] px-4 py-3 font-[var(--font-juman)]"
+        className="flex flex-col gap-2 rounded-xl border-2 border-[var(--juman-gold)] bg-[var(--juman-cream)] px-4 py-3 font-[var(--font-juman)]"
       >
-        <span className="text-xl" aria-hidden="true">⚠️</span>
-        <div className="text-sm font-semibold text-[var(--juman-ink)]">
-          <p>{message}</p>
-          {safeContact && (
-            <p className="mt-2">
-              للتواصل مع الجهة:{" "}
-              <a
-                href={safeContact.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline text-[var(--juman-ink)]"
-              >
-                {safeContact.label || safeContact.url}
-              </a>
-            </p>
-          )}
+        <div className="flex items-center gap-3">
+          <span className="text-xl" aria-hidden="true">⚠️</span>
+          <p className="text-sm font-semibold text-[var(--juman-ink)]">{message}</p>
         </div>
+        {safeContact && (
+          <p className="flex items-center gap-2 text-sm text-[var(--juman-ink)]">
+            <span>للتواصل مع الجهة:</span>
+            <a
+              href={safeContact.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-lg bg-[var(--juman-gold)] px-4 py-1.5 font-semibold text-white transition-opacity hover:opacity-80"
+            >
+              {safeContact.label || safeContact.url}
+            </a>
+          </p>
+        )}
       </div>
     );
   },

@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import {
   AssistantRuntimeProvider,
   useLocalRuntime,
   type ChatModelAdapter,
   type ChatModelRunResult,
-  type SuggestionAdapter,
-  type ThreadSuggestion,
 } from "@assistant-ui/react";
 import { Thread } from "@/components/assistant-ui/elements/thread.aui";
 import { NotCoveredDataUI } from "@/components/juman/not-covered";
@@ -48,7 +46,7 @@ const chatAdapter: ChatModelAdapter = {
       if (data.type === "not-covered") {
         const result: ChatModelRunResult = {
           content: [
-            { type: "data", name: "not-covered", data: { message: data.message } },
+            { type: "data", name: "not-covered", data: { message: data.message, contact: data.contact } },
           ],
         };
         yield result;
@@ -100,21 +98,7 @@ export const Assistant = () => {
       .catch(() => {});
   }, []);
 
-  // Show tenant's suggested questions on the welcome screen
-  const suggestionAdapter = useMemo<SuggestionAdapter | undefined>(() => {
-    if (!tenantConfig?.suggested_questions?.length) return undefined;
-    const suggestions: ThreadSuggestion[] =
-      tenantConfig.suggested_questions.map((q) => ({ prompt: q }));
-    return {
-      async *generate({ messages }) {
-        if (messages.length === 0) yield suggestions;
-      },
-    };
-  }, [tenantConfig]);
-
-  const runtime = useLocalRuntime(chatAdapter, {
-    adapters: { suggestion: suggestionAdapter },
-  });
+  const runtime = useLocalRuntime(chatAdapter);
 
   return (
     <TenantConfigContext.Provider value={tenantConfig}>
