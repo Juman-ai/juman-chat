@@ -30,10 +30,12 @@ export const NotCoveredDataUI = makeAssistantDataUI({
         role="status"
         className="flex flex-col gap-2 rounded-xl border-2 border-[var(--juman-gold)] bg-[var(--juman-cream)] px-4 py-3 font-[var(--font-juman)]"
       >
-        <div className="flex items-center gap-3">
-          <span className="text-xl" aria-hidden="true">⚠️</span>
-          <p className="text-sm font-semibold text-[var(--juman-ink)]">{message}</p>
-        </div>
+        {message && (
+          <div className="flex items-center gap-3">
+            <span className="text-xl" aria-hidden="true">⚠️</span>
+            <p className="text-sm font-semibold text-[var(--juman-ink)]">{message}</p>
+          </div>
+        )}
         {safeContact && (
           <p className="flex items-center gap-2 text-sm text-[var(--juman-ink)]">
             <span>للتواصل مع الجهة:</span>

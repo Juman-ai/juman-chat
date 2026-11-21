@@ -53,6 +53,17 @@ const chatAdapter: ChatModelAdapter = {
         return;
       }
 
+      if (data.type === "text-with-contact") {
+        const result: ChatModelRunResult = {
+          content: [
+            { type: "text" as const, text: data.text },
+            { type: "data", name: "not-covered", data: { message: "", contact: data.contact } },
+          ],
+        };
+        yield result;
+        return;
+      }
+
       if (data.type === "tool-call") {
         const result: ChatModelRunResult = {
           content: [
