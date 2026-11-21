@@ -1,15 +1,22 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 "use client";
 
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import {
   AssistantRuntimeProvider,
   useLocalRuntime,
   type ChatModelAdapter,
   type ChatModelRunResult,
+  type SuggestionAdapter,
+  type ThreadSuggestion,
 } from "@assistant-ui/react";
 import { Thread } from "@/components/assistant-ui/elements/thread.aui";
 import { NotCoveredDataUI } from "@/components/juman/not-covered";
 import { CreateDraftToolUI } from "@/components/juman/create-draft-approval";
+
+type TenantConfig = { name: string; welcome_text: string; suggested_questions: string[] };
+export const TenantConfigContext = createContext<TenantConfig | null>(null);
+export const useTenantConfig = () => useContext(TenantConfigContext);
 
 const API_URL =
   process.env.NEXT_PUBLIC_JUMAN_API_URL ?? "http://localhost:8000";
@@ -84,15 +91,40 @@ const chatAdapter: ChatModelAdapter = {
 };
 
 export const Assistant = () => {
-  const runtime = useLocalRuntime(chatAdapter);
+  const [tenantConfig, setTenantConfig] = useState<TenantConfig | null>(null);
+
+  useEffect(() => {
+    fetch(`${API_URL}/config`, { credentials: "include" })
+      .then((r) => r.json())
+      .then(setTenantConfig)
+      .catch(() => {});
+  }, []);
+
+  // Show tenant's suggested questions on the welcome screen
+  const suggestionAdapter = useMemo<SuggestionAdapter | undefined>(() => {
+    if (!tenantConfig?.suggested_questions?.length) return undefined;
+    const suggestions: ThreadSuggestion[] =
+      tenantConfig.suggested_questions.map((q) => ({ prompt: q }));
+    return {
+      async *generate({ messages }) {
+        if (messages.length === 0) yield suggestions;
+      },
+    };
+  }, [tenantConfig]);
+
+  const runtime = useLocalRuntime(chatAdapter, {
+    adapters: { suggestion: suggestionAdapter },
+  });
 
   return (
-    <AssistantRuntimeProvider runtime={runtime}>
-      <NotCoveredDataUI />
-      <CreateDraftToolUI />
-      <main className="h-dvh">
-        <Thread />
-      </main>
-    </AssistantRuntimeProvider>
+    <TenantConfigContext.Provider value={tenantConfig}>
+      <AssistantRuntimeProvider runtime={runtime}>
+        <NotCoveredDataUI />
+        <CreateDraftToolUI />
+        <main className="h-dvh">
+          <Thread />
+        </main>
+      </AssistantRuntimeProvider>
+    </TenantConfigContext.Provider>
   );
 };
