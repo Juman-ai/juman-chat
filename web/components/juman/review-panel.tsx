@@ -41,6 +41,8 @@ export function ReviewPanel() {
 
   function applyResponse(res: ReviewResponse, computedOnly: boolean) {
     if (computedOnly) {
+      // Replace only computed findings; keep model findings, unchecked clauses,
+      // skipped checks, and model status from the last full review
       setFindings((prev) => [
         ...prev.filter((f) => f.basis !== "computed"),
         ...res.findings,
@@ -48,11 +50,11 @@ export function ReviewPanel() {
     } else {
       setFindings(res.findings);
       setModelStatus(res.model_status);
+      setUncheckedClauses(res.unchecked_clauses);
+      setSkippedChecks(res.skipped_checks);
+      setWordingNotice(res.wording_notice);
       setHasReviewed(true);
     }
-    setUncheckedClauses(res.unchecked_clauses);
-    setSkippedChecks(res.skipped_checks);
-    setWordingNotice(res.wording_notice);
   }
 
   async function handleReview() {
@@ -236,7 +238,7 @@ export function ReviewPanel() {
 
         {hasReviewed && findings.length === 0 && !skippedChecks.some((s) => s.reason === "الحقل فارغ") && (
           <p data-testid="zero-findings" className="text-xs text-green-700">
-            لا توجد ملاحظات من الفحوصات الحاسوبية.
+            {modelStatus === "ok" ? "لا توجد ملاحظات." : "لا توجد ملاحظات من الفحوصات الحاسوبية."}
           </p>
         )}
 
@@ -257,7 +259,7 @@ export function ReviewPanel() {
             </span>
             {skippedChecks.map((sc) => (
               <div key={sc.check_id} className="text-xs text-amber-700">
-                {sc.check_id}: {sc.reason}
+                {sc.name}: {sc.reason}
               </div>
             ))}
           </div>
@@ -273,10 +275,10 @@ export function ReviewPanel() {
                 <span className="font-semibold">{uc.clause_id}</span>
                 <span className="text-[var(--juman-muted)]"> (ص {uc.page})</span>
                 <span className="break-words"> — «{uc.text}»</span>
-                {uc.scope_notice && (
-                  <p className="mt-1 text-[var(--juman-teal)]">{uc.scope_notice}</p>
+                {uc.status === "partial" && uc.scope_notice && (
+                  <p className="mt-1 text-[var(--juman-teal)]">فُحص جزئيًا: {uc.scope_notice}</p>
                 )}
-                {!uc.scope_notice && (
+                {uc.status !== "partial" && (
                   <span className="text-[var(--juman-muted)]"> — لم يُفحص</span>
                 )}
               </div>

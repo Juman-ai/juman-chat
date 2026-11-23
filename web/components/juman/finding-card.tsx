@@ -7,10 +7,14 @@ function SourceLabel({ clauseId, source }: { clauseId: string; source: Finding["
   if (!source) return null;
 
   if (source.source_type === "dga") {
+    const isHeading = clauseId.startsWith("DGA-HEADING");
+    const label = isHeading
+      ? `القسم ${source.section ?? ""}، صفحة ${source.page ?? ""}`
+      : `ضابط ${clauseId}، صفحة ${source.page ?? ""}`;
     return (
       <div className="flex flex-col gap-1 rounded-md bg-[var(--juman-cream)] p-2 text-xs text-[var(--juman-ink)]">
         <span className="font-semibold">
-          ضابط {clauseId}، صفحة {source.page ?? ""}
+          {label}
         </span>
         {source.doc_title && (
           <span className="text-[var(--juman-muted)]">

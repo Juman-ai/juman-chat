@@ -39,7 +39,7 @@ export type ReviewResponse = {
   unchecked_clauses: UncheckedClause[];
   wording_notice: string | null;
   model_status: "ok" | "failed" | "timeout" | "not_run" | null;
-  skipped_checks: Array<{ check_id: string; reason: string }>;
+  skipped_checks: Array<{ check_id: string; name: string; reason: string }>;
   traceability: Record<string, unknown>;
 };
 
