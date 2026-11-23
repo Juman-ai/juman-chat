@@ -30,6 +30,8 @@ export type UncheckedClause = {
   clause_id: string;
   text: string;
   page: number;
+  status?: "not_checked" | "partial";
+  scope_notice?: string;
 };
 
 export type ReviewResponse = {
@@ -37,7 +39,7 @@ export type ReviewResponse = {
   unchecked_clauses: UncheckedClause[];
   wording_notice: string | null;
   model_status: "ok" | "failed" | "timeout" | "not_run" | null;
-  skipped_checks: string[];
+  skipped_checks: Array<{ check_id: string; reason: string }>;
   traceability: Record<string, unknown>;
 };
 

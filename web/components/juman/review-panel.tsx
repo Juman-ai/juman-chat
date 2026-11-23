@@ -29,6 +29,7 @@ export function ReviewPanel() {
   const [fields, setFields] = useState<Fields>(EMPTY_FIELDS);
   const [findings, setFindings] = useState<Finding[]>([]);
   const [uncheckedClauses, setUncheckedClauses] = useState<UncheckedClause[]>([]);
+  const [skippedChecks, setSkippedChecks] = useState<ReviewResponse["skipped_checks"]>([]);
   const [wordingNotice, setWordingNotice] = useState<string | null>(null);
   const [modelStatus, setModelStatus] = useState<ReviewResponse["model_status"] | null>(null);
   const [reviewing, setReviewing] = useState(false);
@@ -50,6 +51,7 @@ export function ReviewPanel() {
       setHasReviewed(true);
     }
     setUncheckedClauses(res.unchecked_clauses);
+    setSkippedChecks(res.skipped_checks);
     setWordingNotice(res.wording_notice);
   }
 
@@ -157,7 +159,7 @@ export function ReviewPanel() {
 
         {modelStatus === "not_run" && hasReviewed && (
           <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-800">
-            لم تُفحص الأخطاء الإملائية والنحوية — ستُضاف في تحديث قادم.
+            لم تعمل فحوصات النموذج — أعد المحاولة.
           </div>
         )}
 
@@ -232,7 +234,7 @@ export function ReviewPanel() {
           </p>
         )}
 
-        {hasReviewed && findings.length === 0 && (
+        {hasReviewed && findings.length === 0 && !skippedChecks.some((s) => s.reason === "الحقل فارغ") && (
           <p data-testid="zero-findings" className="text-xs text-green-700">
             لا توجد ملاحظات من الفحوصات الحاسوبية.
           </p>
@@ -248,16 +250,35 @@ export function ReviewPanel() {
           />
         ))}
 
+        {skippedChecks.length > 0 && (
+          <div className="flex flex-col gap-1 rounded-lg border border-amber-300 bg-amber-50 p-3">
+            <span className="text-xs font-semibold text-amber-800">
+              فحوصات لم تُجرَ:
+            </span>
+            {skippedChecks.map((sc) => (
+              <div key={sc.check_id} className="text-xs text-amber-700">
+                {sc.check_id}: {sc.reason}
+              </div>
+            ))}
+          </div>
+        )}
+
         {uncheckedClauses.length > 0 && (
           <div className="flex flex-col gap-2 rounded-lg border border-[var(--juman-line)] bg-[var(--juman-cream)] p-3">
             <span className="text-xs font-semibold text-[var(--juman-ink)]">
-              ضوابط لم تُفحص في هذه النسخة:
+              حالة الضوابط:
             </span>
             {uncheckedClauses.map((uc) => (
               <div key={uc.clause_id} className="text-xs text-[var(--juman-ink)]">
                 <span className="font-semibold">{uc.clause_id}</span>
                 <span className="text-[var(--juman-muted)]"> (ص {uc.page})</span>
                 <span className="break-words"> — «{uc.text}»</span>
+                {uc.scope_notice && (
+                  <p className="mt-1 text-[var(--juman-teal)]">{uc.scope_notice}</p>
+                )}
+                {!uc.scope_notice && (
+                  <span className="text-[var(--juman-muted)]"> — لم يُفحص</span>
+                )}
               </div>
             ))}
           </div>
