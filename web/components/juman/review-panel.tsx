@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   type Finding,
+  type PolicyStatus,
   type ReviewResponse,
   type UncheckedClause,
   staffFindingAction,
@@ -30,6 +31,7 @@ export function ReviewPanel() {
   const [findings, setFindings] = useState<Finding[]>([]);
   const [uncheckedClauses, setUncheckedClauses] = useState<UncheckedClause[]>([]);
   const [skippedChecks, setSkippedChecks] = useState<ReviewResponse["skipped_checks"]>([]);
+  const [policyStatus, setPolicyStatus] = useState<PolicyStatus | null>(null);
   const [wordingNotice, setWordingNotice] = useState<string | null>(null);
   const [modelStatus, setModelStatus] = useState<ReviewResponse["model_status"] | null>(null);
   const [reviewing, setReviewing] = useState(false);
@@ -52,6 +54,7 @@ export function ReviewPanel() {
       setModelStatus(res.model_status);
       setUncheckedClauses(res.unchecked_clauses);
       setSkippedChecks(res.skipped_checks);
+      setPolicyStatus(res.policy_status);
       setWordingNotice(res.wording_notice);
       setHasReviewed(true);
     }
@@ -283,6 +286,15 @@ export function ReviewPanel() {
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {policyStatus && hasReviewed && (
+          <div className="rounded-lg border border-[var(--juman-line)] bg-[var(--juman-surface)] p-3 text-xs text-[var(--juman-ink)]">
+            <span className="font-semibold">سياسة المحتوى: </span>
+            <span className={policyStatus.has_policy ? "text-[var(--juman-teal)]" : "text-[var(--juman-muted)]"}>
+              {policyStatus.message}
+            </span>
           </div>
         )}
 

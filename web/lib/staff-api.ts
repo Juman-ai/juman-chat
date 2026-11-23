@@ -34,11 +34,19 @@ export type UncheckedClause = {
   scope_notice?: string;
 };
 
+export type PolicyStatus = {
+  has_policy: boolean;
+  is_example?: boolean;
+  rule_count?: number;
+  message: string;
+};
+
 export type ReviewResponse = {
   findings: Finding[];
   unchecked_clauses: UncheckedClause[];
   wording_notice: string | null;
   model_status: "ok" | "failed" | "timeout" | "not_run" | null;
+  policy_status: PolicyStatus;
   skipped_checks: Array<{ check_id: string; name: string; reason: string }>;
   traceability: Record<string, unknown>;
 };
