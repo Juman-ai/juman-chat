@@ -111,6 +111,11 @@ export function DraftPanel({
 
       {result && (
         <div className="flex flex-col gap-4">
+          {result.sources_notice && (
+            <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-800">
+              {result.sources_notice}
+            </div>
+          )}
           <div className="flex flex-col gap-2 rounded-lg border border-[var(--juman-line)] bg-[var(--juman-paper)] p-4">
             <div>
               <span className="text-xs font-semibold text-[var(--juman-muted)]">العنوان: </span>

@@ -66,6 +66,10 @@ export async function staffCheckSession(): Promise<boolean> {
   }
 }
 
+export async function staffLogout(): Promise<void> {
+  await fetch(`${API_URL}/staff/logout`, { method: "POST", credentials: "include" });
+}
+
 export async function staffLogin(code: string): Promise<LoginResult> {
   try {
     const res = await fetch(`${API_URL}/staff/login`, {
@@ -126,7 +130,9 @@ export type DraftResponse = {
     meta_description: string;
     body: string;
     sources: Array<{ index: number; url: string; title: string }>;
+    sources_used: boolean;
   };
+  sources_notice: string | null;
   review: {
     findings: Array<{
       check_id: string;
