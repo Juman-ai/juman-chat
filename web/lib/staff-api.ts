@@ -120,6 +120,44 @@ export async function staffSuggestMeta(payload: {
   return res.json();
 }
 
+export type DraftResponse = {
+  draft: {
+    title: string;
+    meta_description: string;
+    body: string;
+    sources: Array<{ index: number; url: string; title: string }>;
+  };
+  review: {
+    findings: Array<{
+      check_id: string;
+      message: string;
+      field: string;
+      basis: string;
+      clause_id?: string;
+      quote?: string;
+      suggestion?: string;
+    }>;
+    traceability: Record<string, unknown>;
+  };
+};
+
+export async function staffDraft(payload: {
+  notes: string;
+  keyword: string | null;
+}): Promise<DraftResponse> {
+  const res = await fetch(`${API_URL}/staff/draft`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: "Draft failed" }));
+    throw new Error(err.error || `Draft failed: ${res.status}`);
+  }
+  return res.json();
+}
+
 export async function staffFindingAction(payload: {
   finding_id: string;
   action: string;

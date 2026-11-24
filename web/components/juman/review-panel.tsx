@@ -12,6 +12,7 @@ import {
   staffReview,
   staffSuggestMeta,
 } from "@/lib/staff-api";
+import { DraftPanel } from "./draft-panel";
 import { FindingCard } from "./finding-card";
 
 type Fields = {
@@ -319,6 +320,17 @@ export function ReviewPanel() {
             نسخ النص النهائي
           </button>
         </div>
+
+        {/* Draft panel — always available */}
+        <DraftPanel
+          keyword={fields.keyword}
+          currentFields={{ title: fields.title, meta_description: fields.meta_description, body: fields.body }}
+          onUseDraft={(draft) => {
+            handleFieldChange("title", draft.title, false);
+            handleFieldChange("meta_description", draft.meta_description, false);
+            handleFieldChange("body", draft.body, false);
+          }}
+        />
       </div>
 
       {/* Findings sidebar */}
