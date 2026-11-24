@@ -100,6 +100,26 @@ export async function staffReview(payload: {
   return res.json();
 }
 
+export type SuggestMetaResponse = {
+  title: string;
+  meta_description: string;
+  computed_findings: Array<{ check_id: string; message: string; field: string }>;
+};
+
+export async function staffSuggestMeta(payload: {
+  body: string;
+  keyword: string | null;
+}): Promise<SuggestMetaResponse> {
+  const res = await fetch(`${API_URL}/staff/suggest-meta`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`Suggest failed: ${res.status}`);
+  return res.json();
+}
+
 export async function staffFindingAction(payload: {
   finding_id: string;
   action: string;

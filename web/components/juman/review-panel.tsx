@@ -6,9 +6,11 @@ import {
   type Finding,
   type PolicyStatus,
   type ReviewResponse,
+  type SuggestMetaResponse,
   type UncheckedClause,
   staffFindingAction,
   staffReview,
+  staffSuggestMeta,
 } from "@/lib/staff-api";
 import { FindingCard } from "./finding-card";
 
@@ -37,6 +39,8 @@ export function ReviewPanel() {
   const [reviewing, setReviewing] = useState(false);
   const [hasReviewed, setHasReviewed] = useState(false);
   const [staleIds, setStaleIds] = useState<Set<string>>(new Set());
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestion, setSuggestion] = useState<SuggestMetaResponse | null>(null);
 
   const manuallyEditedFields = useRef<Set<string>>(new Set());
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -151,6 +155,40 @@ export function ReviewPanel() {
     });
   }
 
+  async function handleSuggest() {
+    setSuggesting(true);
+    setSuggestion(null);
+    try {
+      const res = await staffSuggestMeta({
+        body: fields.body,
+        keyword: fields.keyword || null,
+      });
+      setSuggestion(res);
+    } catch {
+      /* network error */
+    } finally {
+      setSuggesting(false);
+    }
+  }
+
+  function acceptSuggestion(field: "title" | "meta_description") {
+    if (!suggestion) return;
+    const value = field === "title" ? suggestion.title : suggestion.meta_description;
+    // Never overwrite a field the staff member already filled
+    if (fields[field].trim()) return;
+    handleFieldChange(field, value, false);
+    // Clear the suggestion for that field
+    setSuggestion((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        [field]: "",  // mark as accepted
+      };
+    });
+  }
+
+  const canSuggest = fields.body.trim().length > 0;
+
   const inputClass =
     "w-full rounded-lg border border-[var(--juman-line)] bg-[var(--juman-paper)] px-3 py-2 text-sm text-[var(--juman-ink)] outline-none focus:ring-2 focus:ring-[var(--juman-gold)]";
 
@@ -212,6 +250,53 @@ export function ReviewPanel() {
           />
         </label>
 
+        {/* Suggestion proposal */}
+        {suggestion && (
+          <div className="flex flex-col gap-3 rounded-lg border border-[var(--juman-teal)] bg-[var(--juman-cream)] p-4">
+            <span className="text-sm font-semibold text-[var(--juman-navy)]">اقتراح عنوان ووصف</span>
+            {suggestion.title && (
+              <div className="flex items-start gap-2">
+                <div className="flex-1">
+                  <span className="text-xs text-[var(--juman-muted)]">العنوان: </span>
+                  <span className="text-sm">{suggestion.title}</span>
+                </div>
+                <button
+                  onClick={() => acceptSuggestion("title")}
+                  disabled={!!fields.title.trim()}
+                  title={fields.title.trim() ? "الحقل ممتلئ — لن يُستبدل" : undefined}
+                  className="shrink-0 rounded-md bg-[var(--juman-navy)] px-3 py-1 text-xs font-semibold text-[var(--juman-paper)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  قبول
+                </button>
+              </div>
+            )}
+            {suggestion.meta_description && (
+              <div className="flex items-start gap-2">
+                <div className="flex-1">
+                  <span className="text-xs text-[var(--juman-muted)]">الوصف: </span>
+                  <span className="text-sm">{suggestion.meta_description}</span>
+                </div>
+                <button
+                  onClick={() => acceptSuggestion("meta_description")}
+                  disabled={!!fields.meta_description.trim()}
+                  title={fields.meta_description.trim() ? "الحقل ممتلئ — لن يُستبدل" : undefined}
+                  className="shrink-0 rounded-md bg-[var(--juman-navy)] px-3 py-1 text-xs font-semibold text-[var(--juman-paper)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  قبول
+                </button>
+              </div>
+            )}
+            {suggestion.computed_findings.length > 0 && (
+              <div className="text-xs text-amber-700">
+                <span className="font-semibold">ملاحظات: </span>
+                {suggestion.computed_findings.map((f, i) => (
+                  <span key={i}>{f.message}{i < suggestion.computed_findings.length - 1 ? " | " : ""}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="flex gap-3">
           <button
             onClick={handleReview}
@@ -219,6 +304,13 @@ export function ReviewPanel() {
             className="rounded-lg bg-[var(--juman-navy)] px-5 py-2 text-sm font-semibold text-[var(--juman-paper)] transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {reviewing ? "جارٍ المراجعة…" : "مراجعة"}
+          </button>
+          <button
+            onClick={handleSuggest}
+            disabled={suggesting || !canSuggest}
+            className="rounded-lg border border-[var(--juman-teal)] px-5 py-2 text-sm font-semibold text-[var(--juman-teal)] transition-opacity hover:opacity-80 disabled:opacity-50"
+          >
+            {suggesting ? "جارٍ الاقتراح…" : "اقتراح عنوان ووصف"}
           </button>
           <button
             onClick={handleCopyFinal}
